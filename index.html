@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lava Tierlists</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script>
+    // Example admin authentication (this should ideally be server-side)
+    const adminPassword = "cookingrn";
+    let isAdminLoggedIn = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadPlayers();
+    });
+
+    function login(event) {
+      event.preventDefault();
+      const password = document.getElementById("password").value;
+
+      if (password === adminPassword) {
+        isAdminLoggedIn = true;
+        document.getElementById("admin-login").classList.add("hidden");
+        document.getElementById("admin-panel").classList.remove("hidden");
+        document.querySelectorAll(".remove-btn").forEach(btn => btn.classList.remove("hidden"));
+      } else {
+        alert("Invalid credentials. Try again.");
+      }
+    }
+
+    function addPlayer(event) {
+      event.preventDefault();
+      const playerName = document.getElementById("player-name").value;
+      const tier = document.getElementById("tier").value;
+      const gameMode = document.getElementById("game-mode").value;
+
+      const playerList = document.getElementById(`${gameMode}-list`);
+      const playerItem = document.createElement("div");
+      playerItem.classList.add("flex", "items-center", "space-x-4", "p-4", "bg-gray-800", "rounded-lg", "mb-4");
+
+      // Randomly select either alex.png or steve.png
+      const avatars = ["c:/Users/USER/Documents/alex.png", "c:/Users/USER/Documents/steve.png"];
+      const avatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
+
+      playerItem.innerHTML = `
+        <img src="${avatarUrl}" alt="${playerName}" class="w-16 h-16 rounded-full">
+        <div>
+          <p class="text-lg font-bold text-yellow-400">${tier}</p>
+          <p class="text-sm text-white">${playerName}</p>
+        </div>
+        <button class="remove-btn hidden bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded-lg" onclick="removePlayer('${playerName}', '${gameMode}')">Remove</button>
+      `;
+      playerList.appendChild(playerItem);
+
+      savePlayer(playerName, tier, gameMode);
+
+      document.getElementById("player-form").reset();
+    }
+
+    function savePlayer(playerName, tier, gameMode) {
+      const players = JSON.parse(localStorage.getItem("players")) || [];
+      players.push({ playerName, tier, gameMode });
+      localStorage.setItem("players", JSON.stringify(players));
+    }
+
+    function loadPlayers() {
+      const players = JSON.parse(localStorage.getItem("players")) || [];
+      players.forEach(({ playerName, tier, gameMode }) => {
+        const playerList = document.getElementById(`${gameMode}-list`);
+        const playerItem = document.createElement("div");
+        playerItem.classList.add("flex", "items-center", "space-x-4", "p-4", "bg-gray-800", "rounded-lg", "mb-4");
+
+        // Randomly select either alex.png or steve.png
+        const avatars = ["c:/Users/USER/Documents/alex.png", "c:/Users/USER/Documents/steve.png"];
+        const avatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
+
+        playerItem.innerHTML = `
+          <img src="${avatarUrl}" alt="${playerName}" class="w-16 h-16 rounded-full">
+          <div>
+            <p class="text-lg font-bold text-yellow-400">${tier}</p>
+            <p class="text-sm text-white">${playerName}</p>
+          </div>
+          <button class="remove-btn hidden bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded-lg" onclick="removePlayer('${playerName}', '${gameMode}')">Remove</button>
+        `;
+        playerList.appendChild(playerItem);
+      });
+    }
+
+    function removePlayer(playerName, gameMode) {
+      const players = JSON.parse(localStorage.getItem("players")) || [];
+      const updatedPlayers = players.filter(player => player.playerName !== playerName || player.gameMode !== gameMode);
+      localStorage.setItem("players", JSON.stringify(updatedPlayers));
+      loadPlayers();
+      if (isAdminLoggedIn) {
+        document.querySelectorAll(".remove-btn").forEach(btn => btn.classList.remove("hidden"));
+      }
+    }
+
+    function showGameMode(gameMode) {
+      const gameModes = ["vanilla", "uhc", "sword", "netherite", "axe"];
+      gameModes.forEach(mode => {
+        document.getElementById(`${mode}-list`).classList.add("hidden");
+      });
+      document.getElementById(`${gameMode}-list`).classList.remove("hidden");
+    }
+
+    function backToMainMenu() {
+      document.getElementById("admin-login").classList.add("hidden");
+      document.getElementById("admin-panel").classList.add("hidden");
+      isAdminLoggedIn = false;
+      document.querySelectorAll(".remove-btn").forEach(btn => btn.classList.add("hidden"));
+    }
+
+    function searchPlayers() {
+      const searchInput = document.getElementById("search-input").value.toLowerCase();
+      const playerItems = document.querySelectorAll("#tier-lists div div");
+
+      playerItems.forEach(item => {
+        const playerName = item.querySelector("div p.text-sm").textContent.toLowerCase();
+        if (playerName.includes(searchInput)) {
+          item.classList.remove("hidden");
+        } else {
+          item.classList.add("hidden");
+        }
+      });
+    }
+  </script>
+</head>
+<body class="bg-black text-white font-sans">
+  <!-- Header -->
+  <header class="flex flex-col sm:flex-row justify-between items-center p-4 bg-black border-b border-red-600">
+    <div class="flex items-center space-x-4">
+      <img src="c:/Users/USER/Documents/LAVA.png" alt="Lava Icon" class="w-24 h-24">
+    </div>
+    <div class="flex flex-wrap justify-center items-center space-x-4 mt-4 sm:mt-0">
+      <button onclick="showGameMode('vanilla')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg m-2">
+        <img src="c:/Users/USER/Documents/ender_pearl.png" alt="Ender Pearl" class="w-4 h-4 inline-block mr-2"> Vanilla PvP
+      </button>
+      <button onclick="showGameMode('sword')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg m-2">
+        <img src="c:/Users/USER/Documents/diamond_sword.png" alt="Diamond Sword" class="w-4 h-4 inline-block mr-2"> Sword
+      </button>
+      <button onclick="showGameMode('netherite')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg m-2">
+        <img src="c:/Users/USER/Documents/netherite_chestplate.png" alt="Netherite Chestplate" class="w-4 h-4 inline-block mr-2"> Netherite Pot
+      </button>
+      <button onclick="showGameMode('uhc')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg m-2">
+        <img src="c:/Users/USER/Documents/golden_apple.png" alt="Golden Apple" class="w-4 h-4 inline-block mr-2"> UHC
+      </button>
+      <button onclick="showGameMode('axe')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg m-2">
+        <img src="c:/Users/USER/Documents/diamond_axe.png" alt="Diamond Axe" class="w-4 h-4 inline-block mr-2"> Axe PvP
+      </button>
+    </div>
+    <div class="flex items-center space-x-4 mt-4 sm:mt-0">
+      <input id="search-input" type="text" placeholder="Search player..." class="p-2 bg-gray-800 text-white rounded-lg">
+      <button onclick="document.getElementById('admin-login').classList.toggle('hidden')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg">Admin</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div id="main-content" class="max-w-6xl mx-auto mt-10 px-4">
+    <div id="tier-lists">
+      <h3 class="text-2xl font-semibold mb-4">Tier Lists</h3>
+      <div id="vanilla-list" class="mb-4 hidden">
+        <h4 class="text-xl font-bold text-yellow-400">Vanilla PvP Tierlist</h4>
+        <p class="text-gray-400 mb-4">Players ranked by their skill and performance in Vanilla PvP.</p>
+      </div>
+      <div id="uhc-list" class="mb-4 hidden">
+        <h4 class="text-xl font-bold text-yellow-400">UHC Tierlist</h4>
+        <p class="text-gray-400 mb-4">Players ranked by their skill and performance in UHC.</p>
+      </div>
+      <div id="sword-list" class="mb-4 hidden">
+        <h4 class="text-xl font-bold text-yellow-400">Sword PvP Tierlist</h4>
+        <p class="text-gray-400 mb-4">Players ranked by their skill and performance in Sword PvP.</p>
+      </div>
+      <div id="netherite-list" class="mb-4 hidden">
+        <h4 class="text-xl font-bold text-yellow-400">Netherite Pot Tierlist</h4>
+        <p class="text-gray-400 mb-4">Players ranked by their skill and performance in Netherite Pot.</p>
+      </div>
+      <div id="axe-list" class="mb-4 hidden">
+        <h4 class="text-xl font-bold text-yellow-400">Axe PvP Tierlist</h4>
+        <p class="text-gray-400 mb-4">Players ranked by their skill and performance in Axe PvP.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Form -->
+  <div id="admin-login" class="hidden max-w-md mx-auto mt-10 px-4">
+    <h2 class="text-2xl font-bold text-center mb-4">Admin Login</h2>
+    <form onsubmit="login(event)" class="space-y-4">
+      <div>
+        <label for="password" class="block text-gray-300">Password</label>
+        <input type="password" id="password" class="w-full p-2 bg-gray-800 text-white rounded-lg" required>
+      </div>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">Login</button>
+    </form>
+    <button onclick="backToMainMenu()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg mt-4">Back to Main Menu</button>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin-panel" class="hidden max-w-6xl mx-auto mt-10 px-4">
+    <h2 class="text-3xl font-bold mb-6">Admin Panel</h2>
+    <form id="player-form" onsubmit="addPlayer(event)" class="space-y-4 mb-8">
+      <div>
+        <label for="player-name" class="block text-gray-300">Player Name</label>
+        <input type="text" id="player-name" class="w-full p-2 bg-gray-800 text-white rounded-lg" required>
+      </div>
+      <div>
+        <label for="tier" class="block text-gray-300">Tier</label>
+        <select id="tier" class="w-full p-2 bg-gray-800 text-white rounded-lg" required>
+          <option value="HT1">HT1</option>
+          <option value="LT1">LT1</option>
+          <option value="HT2">HT2</option>
+          <option value="LT2">LT2</option>
+          <option value="HT3">HT3</option>
+          <option value="LT3">LT3</option>
+          <option value="HT4">HT4</option>
+          <option value="LT4">LT4</option>
+          <option value="HT5">HT5</option>
+          <option value="LT5">LT5</option>
+        </select>
+      </div>
+      <div>
+        <label for="game-mode" class="block text-gray-300">Game Mode</label>
+        <select id="game-mode" class="w-full p-2 bg-gray-800 text-white rounded-lg" required>
+          <option value="vanilla">Vanilla PvP</option>
+          <option value="uhc">UHC</option>
+          <option value="sword">Sword PvP</option>
+          <option value="netherite">Netherite Pot</option>
+          <option value="axe">Axe PvP</option>
+        </select>
+      </div>
+      <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg">Add Player</button>
+    </form>
+    <button onclick="backToMainMenu()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg mt-4">Back to Main Menu</button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center py-5 border-t border-gray-600">
+    <a href="https://discord.gg/tUhr6SJA" target="_blank" class="text-blue-400 hover:underline">Join our Discord</a>
+    <p class="text-gray-400 mt-2">© 2025 Lava Tierlists. All rights reserved.</p>
+    <p class="text-gray-400 mt-2">Licensed under the <a href="LICENSE" class="text-blue-400 hover:underline">MIT License</a>.</p>
+  </footer>
+</body>
+</html>
